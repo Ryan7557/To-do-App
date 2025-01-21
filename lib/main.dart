@@ -131,11 +131,27 @@ class _TodoAppState extends State<TodoApp> {
     final DateTime createdAt = DateTime.parse(todoItem.id);
     final String formattedDate =
         '${createdAt.day}/${createdAt.month}/${createdAt.year}';
-    return Card(
-      elevation: 1,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 700),
+      curve: Curves.easeInOutQuad,
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: todoItem.isComplete
+            ? Colors.green.withOpacity(0.4)
+            : Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey,
+            blurRadius: 1,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: ListTile(
-          title: Text(todoItem.title),
+          title: Text(
+            todoItem.title,
+          ),
           subtitle: Text(formattedDate),
           leading: Icon(
             todoItem.isComplete
