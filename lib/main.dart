@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hive_todo_app/model/model.dart';
+import 'package:hive_todo_app/themes/theme.dart';
 
 void main() async {
   await Hive.initFlutter();
@@ -10,25 +11,44 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool isDarkMode = false;
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      debugShowCheckedModeBanner: false,
+      home: TodoApp(
+        onThemeChanged: () {
+          setState(() {
+            isDarkMode = !isDarkMode;
+          });
+        },
+        isDarkMode: isDarkMode,
       ),
-      home: const TodoApp(),
     );
   }
 }
 
 class TodoApp extends StatefulWidget {
-  const TodoApp({super.key});
+  const TodoApp({
+    super.key,
+    required this.onThemeChanged,
+    required this.isDarkMode,
+  });
+  final VoidCallback onThemeChanged;
+  final bool isDarkMode;
 
   @override
   State<TodoApp> createState() => _TodoAppState();
@@ -65,6 +85,7 @@ class _TodoAppState extends State<TodoApp> {
   Future<void> _deleteTodo(int index) async {
     await todoBox.deleteAt(index);
     setState(() {});
+    // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Task deleted'),
@@ -143,6 +164,14 @@ class _TodoAppState extends State<TodoApp> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Hive Todo App'),
+        actions: [
+          IconButton(
+            icon: Icon(widget.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () {
+              widget.onThemeChanged();
+            },
+          ),
+        ],
       ),
       body: ListView.builder(
         itemCount: todoBox.length,
