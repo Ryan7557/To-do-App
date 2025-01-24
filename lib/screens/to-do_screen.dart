@@ -19,6 +19,10 @@ class TodoApp extends StatefulWidget {
 class _TodoAppState extends State<TodoApp> {
   late final Box todoBox;
   final TextEditingController _titleController = TextEditingController();
+  // A map (a collection of key-value pairs) that stores the opacity
+  // (how visible something is) for each task in the to-do list
+  // Each task has an "index" (it's position in the list), and the map uses
+  // this index as the key.
   Map<int, double> opacityValues = {};
 
   @override
@@ -46,14 +50,23 @@ class _TodoAppState extends State<TodoApp> {
   }
 
   Future<void> _deleteTodo(int index) async {
+    // 2. When a task is deleted:
+    // The opacity of the task is set to 0.0 (fully transparent)
+    // in the opacityValues map
+    // This triggers the AnimatedOpacity widget to animate the task fading out
     setState(() {
+      // Make the task invisible.
       opacityValues[index] = 0;
     });
 
     await Future.delayed(const Duration(milliseconds: 700));
     await todoBox.deleteAt(index);
 
+    // 3. After the Animation:
+    // Once the fade-out animation is complete, the task is removed from the
+    // database, and its entry is removed from "opacityValues".
     setState(() {
+      // Remove the task's opacity entry
       opacityValues.remove(index);
     });
 
@@ -107,7 +120,11 @@ class _TodoAppState extends State<TodoApp> {
         '${createdAt.day}/${createdAt.month}/${createdAt.year}';
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // 1. When a task is displayed:
+    // If a task doesn't have an entry in opacityValues, it's given a default opacity
+    // of 1.0 (fully visible), this ensures all tasks are visible by default.
     if (!opacityValues.containsKey(index)) {
+      // default opacity for new tasks.
       opacityValues[index] = 1.0;
     }
 
